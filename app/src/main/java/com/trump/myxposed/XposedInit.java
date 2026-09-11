@@ -1,45 +1,47 @@
 package com.trump.myxposed;
 
-import android.content.SharedPreferences;
+import android.app.Application;
+import android.content.pm.PackageManager;
 
-import com.socks.library.KLog;
 import com.trump.myxposed.hook.WeicoHook;
-import com.trump.myxposed.util.Utils;
-import com.trump.myxposed.util.XSpUtil;
 
-import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
-import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
-import de.robv.android.xposed.callbacks.XC_InitPackageResources;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
-/**
- * Author: TRUMP
- * Date:   2022/2/10 0010 14:56
- * Desc:
- */
-public class XposedInit implements IXposedHookLoadPackage, IXposedHookZygoteInit, IXposedHookInitPackageResources {
+public final class XposedInit implements IXposedHookLoadPackage {
+
+    private static final String TARGET_PACKAGE = "com.weico.international";
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
-        Utils.log("LoadPackage:" + lpparam.packageName);
-        switch (lpparam.packageName) {
-            case Constant.PackageIds.weico:
-                new WeicoHook().handleLoadPackage(lpparam);
-                break;
+        if (!TARGET_PACKAGE.equals(lpparam.packageName)) {
+            return;
         }
+
+        // 等应用的 ClassLoader 就绪后，在原有的 Application.onCreate 时机安装广告 Hook。
+        XposedHelpers.findAndHookMethod(Application.class, "onCreate", new XC_MethodHook() {
+            private boolean initialized;
+
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) {
+                Application application = (Application) param.thisObject;
+                if (initialized || !TARGET_PACKAGE.equals(application.getPackageName())) {
+                    return;
+                }
+                initialized = true;
+
+                String versionName = "";
+                try {
+                    versionName = application.getPackageManager()
+                            .getPackageInfo(TARGET_PACKAGE, 0).versionName;
+                } catch (PackageManager.NameNotFoundException e) {
+                    XposedBridge.log("WBXposed: 无法读取微博版本: " + e);
+                }
+                new WeicoHook().hook(application.getClassLoader(), versionName);
+            }
+        });
     }
-
-    @Override
-    public void initZygote(StartupParam startupParam) throws Throwable {
-
-    }
-
-    @Override
-    public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resparam) throws Throwable {
-
-    }
-
 }

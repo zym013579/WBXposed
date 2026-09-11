@@ -3,8 +3,8 @@ plugins {
 }
 
 android {
+    namespace 'com.trump.myxposed'
     compileSdk 33
-    //buildToolsVersion "31.0.0"
 
     defaultConfig {
         applicationId "com.trump.myxposed"
@@ -42,7 +42,6 @@ android {
         release {
             minifyEnabled false
             signingConfig signingConfigs.release
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -51,32 +50,11 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
 
-    sourceSets {
-        main {
-            jniLibs.srcDirs = ['libs']
-        }
-    }
-
-    lintOptions {
-        checkReleaseBuilds false
-        abortOnError false
-    }
-
     buildFeatures {
-        dataBinding true
+        buildConfig false
     }
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
-
-    implementation 'com.github.zhaokaiqiang.klog:library:1.6.0'
-
     compileOnly 'de.robv.android.xposed:api:82'
-    compileOnly 'de.robv.android.xposed:api:82:sources'
-
-    // For developers using AndroidX in their applications
-    implementation 'pub.devrel:easypermissions:3.0.0'
-    implementation 'com.google.code.gson:gson:2.8.9'
 }
