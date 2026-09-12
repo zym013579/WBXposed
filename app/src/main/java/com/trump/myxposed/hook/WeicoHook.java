@@ -1,7 +1,6 @@
 package com.trump.myxposed.hook;
 
 import android.app.Application;
-import android.view.View;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,43 +11,17 @@ import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 
-/** 微博轻享版（国际版）去广告并隐藏首页发布按钮，启用模块后自动生效。 */
+/** 微博轻享版（国际版）去广告，启用模块后自动生效。 */
 public final class WeicoHook {
 
     private static final String SETTING = "com.weico.international.activity.v4.Setting";
     private static final String FUNCTION1 = "kotlin.jvm.functions.Function1";
     private static final String AD_CALLBACK = "queryUveAdRequest$lambda$";
-    private static final String HOME_POST_BUTTON = "WBXposed:homePostButton";
 
     public void hook(ClassLoader classLoader, String versionName) {
         XposedBridge.log("WBXposed: 安装微博去广告 Hook，版本 " + versionName);
         removeSplashAd(classLoader);
         removeTimelineAd(classLoader, versionName);
-        hideHomePostButton(classLoader);
-    }
-
-    private void hideHomePostButton(ClassLoader classLoader) {
-        hookMethod(classLoader, "com.google.android.material.floatingactionbutton.FloatingActionButton",
-                "setVisibility", int.class, new XC_MethodHook() {
-                    @Override
-                    protected void beforeHookedMethod(MethodHookParam param) {
-                        if (Boolean.TRUE.equals(XposedHelpers.getAdditionalInstanceField(param.thisObject, HOME_POST_BUTTON))) {
-                            param.args[0] = View.GONE;
-                        }
-                    }
-                });
-        hookMethod(classLoader, "com.weico.international.ui.maintab.MainTabFragment", "initView",
-                new XC_MethodHook() {
-                    @Override
-                    protected void afterHookedMethod(MethodHookParam param) {
-                        Object button = XposedHelpers.getObjectField(param.thisObject, "mIndexFab");
-                        if (button instanceof View) {
-                            // 只标记首页的发布按钮，其他悬浮按钮保持应用原有行为。
-                            XposedHelpers.setAdditionalInstanceField(button, HOME_POST_BUTTON, true);
-                            ((View) button).setVisibility(View.GONE);
-                        }
-                    }
-                });
     }
 
     private void removeSplashAd(ClassLoader classLoader) {
