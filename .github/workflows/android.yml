@@ -21,10 +21,11 @@ jobs:
           fetch-depth: 0
           submodules: true
 
-      - name: Set up JDK 18
+      # AGP 7.4.2 / Gradle 7.5 use JDK 11, including the release Lint tasks.
+      - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
-          java-version: '18'
+          java-version: '11'
           distribution: 'temurin'
           cache: gradle
 
@@ -40,7 +41,7 @@ jobs:
 
       - name: Build with Gradle
         shell: bash
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease --stacktrace --console=plain
 
       - name: Find APKs
         run: |
