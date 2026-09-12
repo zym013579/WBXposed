@@ -3,26 +3,7 @@
 
     <application
         android:allowBackup="false"
-        android:label="@string/app_name">
-
-        <!-- 设置为 Xposed 模块 -->
-        <meta-data
-            android:name="xposedmodule"
-            android:value="true" />
-
-        <meta-data
-            android:name="xposeddescription"
-            android:value="@string/module_description" />
-
-        <!-- 最低 Xposed 版本号，若你正在使用 EdXposed/LSPosed，建议最低为 93 -->
-        <meta-data
-            android:name="xposedminversion"
-            android:value="93" />
-
-        <!-- XP 范围 -->
-        <meta-data
-            android:name="xposedscope"
-            android:resource="@array/xposed_scope" />
-    </application>
+        android:description="@string/module_description"
+        android:label="@string/app_name" />
 
 </manifest>
